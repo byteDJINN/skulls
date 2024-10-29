@@ -10,12 +10,12 @@
 
 class Connection {
 public:
-    Connection(const Bot& bot);
+    Connection(Bot& bot);
     void start();
 private:
     void sendActionRequest(const skulls::ActionRequest& request);
 
-    Bot bot;
+    Bot& bot;
     std::shared_ptr<grpc::Channel> channel;
     std::unique_ptr<skulls::GameService::Stub> stub_;
     std::shared_ptr<grpc::ClientReaderWriter<skulls::ActionRequest, skulls::GameState>> stream_;

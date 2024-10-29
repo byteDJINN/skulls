@@ -5,11 +5,10 @@
 
 #include <string>
 
-Connection::Connection(const Bot& bot)
+Connection::Connection(Bot& bot): bot(bot)
 {
     channel = grpc::CreateChannel("127.0.0.1:50051", grpc::InsecureChannelCredentials());
     stub_ = skulls::GameService::NewStub(channel);
-    Connection::bot = bot;
 }
 
 void Connection::start() {

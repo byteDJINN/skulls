@@ -5,7 +5,8 @@
 
 class Bot {
 public:
-    virtual skulls::ActionRequest getAction(const skulls::GameState& gameState);
+    virtual skulls::ActionRequest getAction(const skulls::GameState& gameState) = 0;
+    virtual ~Bot() = default;
 };
 
 #endif
