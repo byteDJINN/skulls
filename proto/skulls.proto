@@ -1,4 +1,4 @@
-syntax = "proto3"
+syntax = "proto3";
 
 package skulls; 
 
@@ -10,7 +10,7 @@ enum Card {
 // private information to each player
 message KnownDiscardedCard {
     string player_id = 1;
-    Card card; 
+    Card card = 2;
 }
 
 message PlayerData {
@@ -23,10 +23,11 @@ message PlayerData {
 message GameState {
     repeated PlayerData player_data = 1; // in turn order
     int32 turn_index = 2; // index in data of player who's turn it is
+    repeated KnownDiscardedCard known_discarded_cards = 3; // private to the current requester
 }
 
 message BetAction {
-    int32 amount = 1;
+    repeated string player_ids = 1; // repeat player's id for the number of their cards to flip
 }
 
 message PassAction {}
@@ -44,9 +45,7 @@ message ActionRequest {
 
 message ActionResponse {
     GameState game_state = 1;
-    repeated KnownDiscardedCard known_discarded_cards = 2;
 }
-
 
 service GameService {
     // client should with an ActionRequest each time they receive an ActionResponse
