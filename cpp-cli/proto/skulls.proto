@@ -1,0 +1,54 @@
+syntax = "proto3"
+
+package skulls; 
+
+enum Card {
+    ROSE = 0;
+    SKULL = 1;
+}
+
+// private information to each player
+message KnownDiscardedCard {
+    string player_id = 1;
+    Card card; 
+}
+
+message PlayerData {
+    string player_id = 1;
+    repeated Card hand = 2;
+    repeated Card played = 3;
+    int32 points = 4; 
+}
+
+message GameState {
+    repeated PlayerData player_data = 1; // in turn order
+    int32 turn_index = 2; // index in data of player who's turn it is
+}
+
+message BetAction {
+    int32 amount = 1;
+}
+
+message PassAction {}
+message SkullAction {}
+message RoseAction {}
+
+message ActionRequest {
+    oneof action {
+        BetAction bet_action = 2;
+        PassAction pass_action = 3;
+        SkullAction skull_action = 4;
+        RoseAction rose_action = 5;
+    }
+}
+
+message ActionResponse {
+    GameState game_state = 1;
+    repeated KnownDiscardedCard known_discarded_cards = 2;
+}
+
+
+service GameService {
+    // client should with an ActionRequest each time they receive an ActionResponse
+    rpc GetAction(stream ActionRequest) returns (stream ActionResponse); 
+}
