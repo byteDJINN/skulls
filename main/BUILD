@@ -1,11 +1,20 @@
 
+cc_library(
+    name = "botInterface",
+    srcs = ["botInterface.hpp"],
+    deps = [
+        "//proto:cpp"
+    ],
+    visibility = ["//visibility:public"],
+)
 
 cc_library(
     name = "connection",
     srcs = ["connection.cpp"],
-    hdrs = ["connection.hpp", "bot.hpp"],
+    hdrs = ["connection.hpp"],
     deps = [
         "//proto:cpp",
+        ":botInterface",
     ],
 )
 
@@ -14,5 +23,6 @@ cc_binary(
     srcs = ["main.cpp"],
     deps = [
         ":connection",
+        "//bots:allBots",
     ],
 )

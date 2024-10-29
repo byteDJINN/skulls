@@ -2,7 +2,7 @@
 #define MAIN_CONNECTION_H_
 
 #include "proto/skulls.grpc.pb.h"
-#include "bot.hpp"
+#include "botInterface.hpp"
 
 #include <grpcpp/grpcpp.h>
 #include <string>
