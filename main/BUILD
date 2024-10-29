@@ -3,7 +3,7 @@
 cc_library(
     name = "connection",
     srcs = ["connection.cpp"],
-    hdrs = ["connection.hpp"],
+    hdrs = ["connection.hpp", "bot.hpp"],
     deps = [
         "//proto:cpp",
     ],

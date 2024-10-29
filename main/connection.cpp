@@ -1,33 +1,36 @@
 
 #include "connection.hpp"
 #include "proto/skulls.grpc.pb.h"
+#include "bot.hpp"
 
 #include <string>
 
-Connection::Connection()
+Connection::Connection(const Bot& bot)
 {
     channel = grpc::CreateChannel("127.0.0.1:50051", grpc::InsecureChannelCredentials());
     stub_ = skulls::GameService::NewStub(channel);
+    Connection::bot = bot;
 }
 
-// std::string Connection::sendMessage(const std::string& message)
-// {
-//     chat::MessageRequest request; 
-//     request.set_text(message);
-//     request.set_name(name);
+void Connection::start() {
+    grpc::ClientContext context;
+    stream_ = stub_->GetAction(&context);
 
-//     chat::Response response; 
-//     grpc::ClientContext context;
-//     grpc::Status status;
+    skulls::GameState gameState;
+    while (stream_->Read(&gameState)) // Read is a blocking call
+    { 
+        skulls::ActionRequest request = bot.getAction(gameState);
+        sendActionRequest(request);
+    }
+    grpc::Status status = stream_->Finish();
+    if (!status.ok())
+    {
+        std::cerr << "Stream finished with error: " << status.error_message() << std::endl;
+    }
+}
 
-//     status = stub_->SendMessage(&context, request, &response);
-
-//     if (status.ok()) {
-//         if (!response.issuccess()) {
-//             return response.text();
-//         }
-//         return "";
-//     } else {
-//         return "GRPC Code " + std::to_string(status.error_code()) + ": " + status.error_message();
-//     }
-// }
+void Connection::sendActionRequest(const skulls::ActionRequest &request) {
+    if (!stream_->Write(request)) {
+        std::cerr << "Failed to write to stream!" << std::endl;
+    }
+}

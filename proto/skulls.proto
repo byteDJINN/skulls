@@ -43,11 +43,7 @@ message ActionRequest {
     }
 }
 
-message ActionResponse {
-    GameState game_state = 1;
-}
-
 service GameService {
-    // client should with an ActionRequest each time they receive an ActionResponse
-    rpc GetAction(stream ActionRequest) returns (stream ActionResponse); 
+    // client should with an ActionRequest each time they receive an GameState
+    rpc GetAction(stream ActionRequest) returns (stream GameState); 
 }
