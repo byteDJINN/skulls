@@ -1,0 +1,2 @@
+bazel_dep(name = "rules_proto_grpc_java", version = "5.0.0")
+
