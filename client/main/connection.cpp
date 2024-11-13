@@ -1,6 +1,6 @@
 
 #include "connection.hpp"
-#include "proto/skulls.grpc.pb.h"
+#include "skulls.grpc.pb.h"
 #include "botInterface.hpp"
 
 #include <string>

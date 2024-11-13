@@ -1,7 +1,7 @@
 #ifndef MAIN_CONNECTION_H_
 #define MAIN_CONNECTION_H_
 
-#include "proto/skulls.grpc.pb.h"
+#include "skulls.grpc.pb.h"
 #include "botInterface.hpp"
 
 #include <grpcpp/grpcpp.h>

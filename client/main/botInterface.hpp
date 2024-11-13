@@ -1,7 +1,7 @@
 #ifndef MAIN_BOT_H_
 #define MAIN_BOT_H_
 
-#include "proto/skulls.grpc.pb.h"
+#include "skulls.grpc.pb.h"
 
 class Bot {
 public:

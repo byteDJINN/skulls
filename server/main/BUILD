@@ -2,16 +2,16 @@ load("@rules_proto_grpc_java//:defs.bzl", "java_grpc_library")
 
 
 java_grpc_library(
-    name = "proto_java",
+    name = "protoJava",
     protos = ["@proto//:library"],
 )
 
 java_library(
-    name = "connection",
+    name = "gameServer",
     srcs = [
-        "Connection.java"
+        "GameServer.java"
     ],
-    deps = [":proto_java"],
+    deps = [":protoJava"],
 )
 
 java_binary(
@@ -19,6 +19,6 @@ java_binary(
     srcs = [
         "Engine.java"
     ],
-    deps = [":connection"],
+    deps = [":gameServer"],
     main_class = "Engine",
 )
