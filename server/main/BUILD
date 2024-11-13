@@ -11,6 +11,17 @@ java_library(
     srcs = [
         "GameServer.java"
     ],
+    deps = [
+        ":protoJava",
+        ":logic"
+    ],
+)
+
+java_library(
+    name = "logic",
+    srcs = [
+        "Logic.java"
+    ],
     deps = [":protoJava"],
 )
 

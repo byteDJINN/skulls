@@ -4,38 +4,49 @@ import io.grpc.stub.StreamObserver;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.UUID;
 
 import skulls.GameServiceGrpc;
 import skulls.Skulls.GameState;
 import skulls.Skulls.ActionRequest;
 
 public class GameServer extends GameServiceGrpc.GameServiceImplBase {
-
     private class ClientManager {
-        private final ArrayList<StreamObserver<GameState>> clients = new ArrayList<>();
-        private int currentIndex = 0; 
+        private final LinkedHashMap<StreamObserver<GameState>, String> clientPlayerMap = new LinkedHashMap<>();
+        private int currentIndex = 0;
 
         public void addClient(StreamObserver<GameState> client) {
             System.out.println("Adding client");
-            clients.add(client);
+            String playerId = assignPlayerId();
+            clientPlayerMap.put(client, playerId);
         }
 
         public void removeClient(StreamObserver<GameState> client) {
             System.out.println("Removing client");
-            clients.remove(client);
+            clientPlayerMap.remove(client);
         }
 
         public StreamObserver<GameState> nextClient() {
-            if (clients.isEmpty()) {
+            if (clientPlayerMap.isEmpty()) {
                 return null;
             }
-            currentIndex = (currentIndex + 1) % clients.size();
-            return clients.get(currentIndex);
+            currentIndex = (currentIndex + 1) % clientPlayerMap.size();
+            return (StreamObserver<GameState>) clientPlayerMap.keySet().toArray()[currentIndex];
+        }
+
+        public String getPlayerId(StreamObserver<GameState> client) {
+            return clientPlayerMap.get(client);
+        }
+
+        private String assignPlayerId() {
+            return UUID.randomUUID().toString();
         }
     }
     
     private Server server;
     private final ClientManager clientManager = new ClientManager();
+    private final Logic logic = new Logic();
     
     public void run() {
         try {
@@ -61,11 +72,11 @@ public class GameServer extends GameServiceGrpc.GameServiceImplBase {
                 System.out.println("Received action: " + request.getActionCase());
 
                 // process ActionRequest and send new GameState
-                GameState response = GameState.newBuilder().build();
+                logic.processActionRequest(request);
 
                 StreamObserver<GameState> client = clientManager.nextClient();
                 if (client != null) {
-                    client.onNext(response);
+                    client.onNext(logic.getGameState(clientManager.getPlayerId(client))); // client's player_id
                 }
             }
 

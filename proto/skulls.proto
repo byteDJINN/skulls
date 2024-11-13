@@ -5,12 +5,14 @@ package skulls;
 enum Card {
     ROSE = 0;
     SKULL = 1;
+    HIDDEN = 2;
 }
 
 // private information to each player
 message KnownDiscardedCard {
-    string player_id = 1;
-    Card card = 2;
+    string knowing_player_id = 1;
+    string player_id = 2;
+    Card card = 3;
 }
 
 message PlayerData {
