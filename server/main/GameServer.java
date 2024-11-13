@@ -14,30 +14,32 @@ import skulls.Skulls.ActionRequest;
 public class GameServer extends GameServiceGrpc.GameServiceImplBase {
     private class ClientManager {
         private final LinkedHashMap<StreamObserver<GameState>, String> clientPlayerMap = new LinkedHashMap<>();
-        private int currentIndex = 0;
+        private final int PLAYER_COUNT = 2; // TODO arbitrary value
 
         public void addClient(StreamObserver<GameState> client) {
+            if (clientPlayerMap.size() >= PLAYER_COUNT) {
+                System.out.println("Client rejected: game is full");
+                return;
+            }
             System.out.println("Adding client");
             String playerId = assignPlayerId();
             clientPlayerMap.put(client, playerId);
 
-            if (clientPlayerMap.size() == 2) { // TODO arbitrary value start game at 2 players
+            if (clientPlayerMap.size() == PLAYER_COUNT) { 
                 logic = new Logic(new ArrayList<>(clientPlayerMap.values()));
-                client.onNext(logic.getGameState(playerId));
+                client.onNext(logic.getGameState(playerId)); // trigger start of game
             }
-        }
-
-        public void removeClient(StreamObserver<GameState> client) {
-            System.out.println("Removing client");
-            clientPlayerMap.remove(client);
         }
 
         public StreamObserver<GameState> nextClient() {
             if (clientPlayerMap.isEmpty()) {
                 return null;
             }
-            currentIndex = (currentIndex + 1) % clientPlayerMap.size();
-            return (StreamObserver<GameState>) clientPlayerMap.keySet().toArray()[currentIndex];
+            return (StreamObserver<GameState>) clientPlayerMap.keySet().toArray()[logic.getTurnIndex()];
+        }
+
+        public String getCurrentClientId() {
+            return clientPlayerMap.get(clientPlayerMap.keySet().toArray()[logic.getTurnIndex()]);
         }
 
         public String getPlayerId(StreamObserver<GameState> client) {
@@ -74,10 +76,10 @@ public class GameServer extends GameServiceGrpc.GameServiceImplBase {
         return new StreamObserver<ActionRequest>() {
             @Override
             public void onNext(ActionRequest request) {
-                System.out.println("Received action: " + request.getActionCase());
+                System.out.println("Received action: [" + clientManager.getCurrentClientId() + ", " + request.getActionCase() + "]");
 
                 // process ActionRequest and send new GameState
-                logic.processActionRequest(request);
+                logic.processActionRequest(clientManager.getCurrentClientId(), request);
 
                 StreamObserver<GameState> client = clientManager.nextClient();
                 if (client != null) {
@@ -88,13 +90,14 @@ public class GameServer extends GameServiceGrpc.GameServiceImplBase {
             @Override
             public void onError(Throwable t) {
                 System.out.println("Error: " + t.getMessage());
-                clientManager.removeClient(responseObserver);
+                server.shutdown();
             }
 
             @Override
             public void onCompleted() {
                 responseObserver.onCompleted();
-                clientManager.removeClient(responseObserver);
+                System.out.println("One of the clients disconnected!");
+                server.shutdown();
             }
         };
     }
