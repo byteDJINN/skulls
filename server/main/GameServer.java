@@ -20,6 +20,11 @@ public class GameServer extends GameServiceGrpc.GameServiceImplBase {
             System.out.println("Adding client");
             String playerId = assignPlayerId();
             clientPlayerMap.put(client, playerId);
+
+            if (clientPlayerMap.size() == 2) { // TODO arbitrary value start game at 2 players
+                logic = new Logic(new ArrayList<>(clientPlayerMap.values()));
+                client.onNext(logic.getGameState(playerId));
+            }
         }
 
         public void removeClient(StreamObserver<GameState> client) {
@@ -46,7 +51,7 @@ public class GameServer extends GameServiceGrpc.GameServiceImplBase {
     
     private Server server;
     private final ClientManager clientManager = new ClientManager();
-    private final Logic logic = new Logic();
+    private Logic logic;
     
     public void run() {
         try {
@@ -76,7 +81,7 @@ public class GameServer extends GameServiceGrpc.GameServiceImplBase {
 
                 StreamObserver<GameState> client = clientManager.nextClient();
                 if (client != null) {
-                    client.onNext(logic.getGameState(clientManager.getPlayerId(client))); // client's player_id
+                    client.onNext(logic.getGameState(clientManager.getPlayerId(client))); 
                 }
             }
 

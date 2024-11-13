@@ -1,65 +1,63 @@
-
-
 import skulls.Skulls.GameState;
 import skulls.Skulls.ActionRequest;
 import skulls.Skulls.PlayerData;
 import skulls.Skulls.Card;
 import skulls.Skulls.KnownDiscardedCard;
 
+import java.util.ArrayList;
 
 public class Logic {
-  private GameState gameState;
+    private GameState gameState;
 
-  public void processActionRequest(ActionRequest request) {
-    // process the request
-    // update the game state
-  }
+    public Logic(ArrayList<String> playerIds) {
+        GameState.Builder gameStateBuilder = GameState.newBuilder()
+            .setTurnIndex(0);
 
-    public GameState getGameState(String playerId) {
-        // Create a new GameState object
-        GameState.Builder newGameStateBuilder = GameState.newBuilder();
+        for (String playerId : playerIds) {
+            PlayerData.Builder playerDataBuilder = PlayerData.newBuilder()
+                .setPlayerId(playerId)
+                .setPoints(0);
 
-        // Copy and modify player data
-        for (PlayerData playerData : gameState.getPlayerDataList()) {
-            PlayerData.Builder newPlayerDataBuilder = PlayerData.newBuilder()
-                .setPlayerId(playerData.getPlayerId())
-                .setPoints(playerData.getPoints());
+            // Add 3 roses and 1 skull to the player's hand
+            playerDataBuilder.addHand(Card.ROSE);
+            playerDataBuilder.addHand(Card.ROSE);
+            playerDataBuilder.addHand(Card.ROSE);
+            playerDataBuilder.addHand(Card.SKULL);
 
-            if (!playerData.getPlayerId().equals(playerId)) {
-                for (Card card : playerData.getHandList()) {
-                    newPlayerDataBuilder.addHand(Card.HIDDEN);
-                }
-                for (Card card : playerData.getPlayedList()) {
-                    newPlayerDataBuilder.addPlayed(Card.HIDDEN);
-                }
-            } else {
-                newPlayerDataBuilder.addAllHand(playerData.getHandList());
-                newPlayerDataBuilder.addAllPlayed(playerData.getPlayedList());
-            }
-
-            newGameStateBuilder.addPlayerData(newPlayerDataBuilder);
+            gameStateBuilder.addPlayerData(playerDataBuilder);
         }
 
-        // Copy and modify known discarded cards
-        for (KnownDiscardedCard knownDiscardedCard : gameState.getKnownDiscardedCardsList()) {
-            KnownDiscardedCard.Builder newKnownDiscardedCardBuilder = KnownDiscardedCard.newBuilder()
-                .setKnowingPlayerId(knownDiscardedCard.getKnowingPlayerId())
-                .setPlayerId(knownDiscardedCard.getPlayerId());
-
-            if (!knownDiscardedCard.getKnowingPlayerId().equals(playerId)) {
-                newKnownDiscardedCardBuilder.setCard(Card.HIDDEN);
-            } else {
-                newKnownDiscardedCardBuilder.setCard(knownDiscardedCard.getCard());
-            }
-
-            newGameStateBuilder.addKnownDiscardedCards(newKnownDiscardedCardBuilder);
-        }
-
-        // Set the turn index
-        newGameStateBuilder.setTurnIndex(gameState.getTurnIndex());
-
-        return newGameStateBuilder.build();
+        gameState = gameStateBuilder.build();
     }
 
+    public void processActionRequest(ActionRequest request) {
+        // process the request
+        // update the game state
+    }
+
+    public GameState getGameState(String playerId) {
+        // Create a copy of the game state
+        GameState.Builder perspectiveGameStateBuilder = gameState.toBuilder();
+
+        // Modify the copied game state from the perspective of the player
+        for (PlayerData.Builder playerDataBuilder : perspectiveGameStateBuilder.getPlayerDataBuilderList()) {
+            if (!playerDataBuilder.getPlayerId().equals(playerId)) {
+                for (int i = 0; i < playerDataBuilder.getHandCount(); i++) {
+                    playerDataBuilder.setHand(i, Card.HIDDEN);
+                }
+                for (int i = 0; i < playerDataBuilder.getPlayedCount(); i++) {
+                    playerDataBuilder.setPlayed(i, Card.HIDDEN);
+                }
+            }
+        }
+
+        for (KnownDiscardedCard.Builder knownDiscardedCardBuilder : perspectiveGameStateBuilder.getKnownDiscardedCardsBuilderList()) {
+            if (!knownDiscardedCardBuilder.getKnowingPlayerId().equals(playerId)) {
+                knownDiscardedCardBuilder.setCard(Card.HIDDEN);
+            }
+        }
+
+        return perspectiveGameStateBuilder.build();
+    }
 
 }
