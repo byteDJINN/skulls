@@ -7,13 +7,24 @@ java_grpc_library(
 )
 
 java_library(
+    name = "clientManager",
+    srcs = [
+        "ClientManager.java"
+    ],
+    deps = [
+        ":protoJava",
+    ]
+)
+
+java_library(
     name = "gameServer",
     srcs = [
         "GameServer.java"
     ],
     deps = [
         ":protoJava",
-        ":logic"
+        ":logic",
+        ":clientManager",
     ],
 )
 

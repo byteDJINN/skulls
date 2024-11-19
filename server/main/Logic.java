@@ -116,8 +116,8 @@ public class Logic {
         return perspectiveGameStateBuilder.build();
     }
 
-    public int getTurnIndex() {
-        return gameState.getTurnIndex();
+    public String getTurnPlayerId() {
+        return gameState.getPlayerData(gameState.getTurnIndex()).getPlayerId();
     }
 
 }
