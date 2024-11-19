@@ -4,6 +4,9 @@ java_library(
     srcs = [
         "ActionProcessor.java",
         "PassActionProcessor.java",
+        "BetActionProcessor.java",
+        "RoseActionProcessor.java",
+        "SkullActionProcessor.java",
     ],
     deps = [
         "//main:protoJava",

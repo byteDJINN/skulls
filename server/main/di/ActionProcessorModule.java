@@ -7,8 +7,29 @@ import dagger.multibindings.StringKey;
 public class ActionProcessorModule {
     @Provides
     @IntoMap
+    @StringKey("BetAction")
+    ActionProcessor provideBetActionProcessor() {
+        return new BetActionProcessor();
+    }
+
+    @Provides
+    @IntoMap
     @StringKey("PassAction")
     ActionProcessor providePassActionProcessor() {
         return new PassActionProcessor();
+    }
+
+    @Provides
+    @IntoMap
+    @StringKey("SkullAction")
+    ActionProcessor provideSkullActionProcessor() {
+        return new SkullActionProcessor();
+    }
+
+    @Provides
+    @IntoMap
+    @StringKey("RoseAction")
+    ActionProcessor provideRoseActionProcessor() {
+        return new RoseActionProcessor();
     }
 }
