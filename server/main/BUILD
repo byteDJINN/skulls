@@ -4,6 +4,7 @@ load("@rules_proto_grpc_java//:defs.bzl", "java_grpc_library")
 java_grpc_library(
     name = "protoJava",
     protos = ["@proto//:library"],
+    visibility = ["//visibility:public"],
 )
 
 java_library(
@@ -25,6 +26,8 @@ java_library(
         ":protoJava",
         ":logic",
         ":clientManager",
+        "//main/action:actionProcessors",
+        "//main/di:di",
     ],
 )
 
@@ -33,7 +36,10 @@ java_library(
     srcs = [
         "Logic.java"
     ],
-    deps = [":protoJava"],
+    deps = [
+        ":protoJava",
+        "//main/action:actionProcessors",
+    ],
 )
 
 java_binary(
